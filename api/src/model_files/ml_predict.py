@@ -59,46 +59,65 @@ class Network(nn.Module):
 
 
 def get_remedy(plant_disease):
-    with open("model_files/data.json", 'r') as f:
+    with open("backend/model_files/data.json", 'rb') as f:
 	    remedies = json.load(f)
     # Get remedy for the given plant disease
     for key in remedies:
         if key == plant_disease:
             return(remedies[key])
+        
+def get_nutrition(plant_disease):
+    with open("backend/model_files/nutri.json", 'rb') as f:
+        nutrient = json.load(f)
+        for key in nutrient:
+            if key == plant_disease:
+                return(nutrient[key])
 
 
 # to avoid gradients update
 @torch.no_grad()
-def predict_plant(model,imgdata):
-    with open('model_files/labels.json', 'rb') as lb:
+def predict_plant(model, imgdata):
+    with open('backend/model_files/labels.json', 'rb') as lb:
         labels = pickle.load(lb)
 
     loaded_model = model
-    loaded_model.load_state_dict(torch.load("model_files/model.pth"))
+    loaded_model.load_state_dict(torch.load("backend/model_files/model.pth"))
     loaded_model.eval()
 
     # Converting Base64 string to Image
     image = Image.open(io.BytesIO(imgdata))
     # Resizing Image
-    resize = transforms.Compose([transforms.Resize((256,256))])
+    resize = transforms.Compose([transforms.Resize((256, 256))])
     image = ToTensor()(image)
 
     # Getting prediction from model
     y_result = model(resize(image).unsqueeze(0))
-    result_idx = y_result.argmax(dim=1)
+    result_idx = y_result.argmax(dim=1).item()  # Get the predicted class index
 
-    # Getting Plant disease from result
-    for key,value in labels.items():
-        if(value==result_idx):
-            plant_disease= key
+    # Find the corresponding plant disease or healthy label
+    plant_disease = None
+    for key, value in labels.items():
+        if value == result_idx:
+            plant_disease = key
             break
-    if ("healthy" not in plant_disease):
-        # Get remedy for given plant disease
+
+    if plant_disease is None:
+        # If the label is not found, return an error response
+        raise ValueError("Prediction result does not match any known label.")
+
+    # Check if the plant is healthy
+    if "healthy" in plant_disease.lower():
+        remedy = "Plant is healthy, no disease detected."
+        nutrients = None
+    else:
         try:
             remedy = get_remedy(plant_disease)
         except:
             remedy = "Not Found!"
-    else:
-        remedy = "Plant is Healthy"
 
-    return plant_disease,remedy
+        try:
+            nutrients = get_nutrition(plant_disease)
+        except:
+            nutrients = "Nutrients data not available."
+
+    return plant_disease, remedy, nutrients
