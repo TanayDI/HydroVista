@@ -19,7 +19,7 @@ translator = Translator()
 # Initialize model once
 model = Network()
 try:
-    model.load_state_dict(torch.load("api/src/model_files/model_2.pth"))
+    model.load_state_dict(torch.load("model_files/model_2.pth"))
     model.eval()
     print("Model loaded successfully.")
 except Exception as e:
