@@ -59,7 +59,7 @@ class Network(nn.Module):
 
 
 def get_remedy(plant_disease):
-    with open("data.json", 'rb') as f:
+    with open("model_files/data.json", 'rb') as f:
 	    remedies = json.load(f)
     # Get remedy for the given plant disease
     for key in remedies:
@@ -67,7 +67,7 @@ def get_remedy(plant_disease):
             return(remedies[key])
         
 def get_nutrition(plant_disease):
-    with open("nutri.json", 'rb') as f:
+    with open("model_files/nutri.json", 'rb') as f:
         nutrient = json.load(f)
         for key in nutrient:
             if key == plant_disease:
@@ -77,7 +77,7 @@ def get_nutrition(plant_disease):
 # to avoid gradients update
 @torch.no_grad()
 def predict_plant(model, imgdata):
-    with open('labels_2.json', 'rb') as lb:
+    with open('model_files/labels_2.json', 'rb') as lb:
         labels = pickle.load(lb)
 
     loaded_model = model
