@@ -59,7 +59,7 @@ class Network(nn.Module):
 
 
 def get_remedy(plant_disease):
-    with open("model_files/data.json", 'rb') as f:
+    with open("model_files/data.json", 'r') as f:
 	    remedies = json.load(f)
     # Get remedy for the given plant disease
     for key in remedies:
