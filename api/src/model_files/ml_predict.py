@@ -67,7 +67,7 @@ def get_remedy(plant_disease):
             return(remedies[key])
         
 def get_nutrition(plant_disease):
-    with open("model_files/nutri.json", 'rb') as f:
+    with open("model_files/nutri.json", 'r') as f:
         nutrient = json.load(f)
         for key in nutrient:
             if key == plant_disease:
